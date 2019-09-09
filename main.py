@@ -9,7 +9,7 @@ serversocket = socket.socket(
 	        socket.AF_INET, socket.SOCK_STREAM) 
 
 # get local machine name
-host = socket.gethostname()                           
+host = "0.0.0.0"                           
 
 port = 9999                                           
 
@@ -33,8 +33,8 @@ def client_tx_thread():
     global current_client
     while True:
         data = gnss_device.read(1)
-        print("rx:", data)
         if current_client:
+            print("rx:", data)
             current_client.send(data)
 
 _thread.start_new_thread(client_tx_thread, ())
