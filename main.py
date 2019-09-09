@@ -7,6 +7,8 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
+import subprocess
+
 from luma.core.interface.serial import i2c, spi
 from luma.oled.device import ssd1306, ssd1325, ssd1331, sh1106
 
@@ -66,8 +68,6 @@ bottom = height - padding
 x = 0
 font = ImageFont.load_default()
 while True:
-    oled.display(background.convert(device.mode))
-
     draw.rectangle((0,0,width,height), outline=0, fill=0)
 
     # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
