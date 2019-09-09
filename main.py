@@ -24,7 +24,7 @@ def client_rx_thread():
     global current_client
     while True:
         if current_client:
-            data = current_client.recv(1024)
+            data = current_client.recv(1)
             print("tx:", data)
             gnss_device.write(data)
             print(data)
@@ -32,7 +32,7 @@ def client_rx_thread():
 def client_tx_thread():
     global current_client
     while True:
-        data = gnss_device.read(1024)
+        data = gnss_device.read(1)
         print("rx:", data)
         if current_client:
             current_client.send(data)
