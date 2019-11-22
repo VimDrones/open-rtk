@@ -5,8 +5,7 @@ import spidev
 spi = spidev.SpiDev()
 spi.open(0,0)
 spi.mode = 0b11
-spi.max_speed_hz = 125000
-
+spi.max_speed_hz = 125000 * 16
 
 import struct
 HEADER = 0xAA
