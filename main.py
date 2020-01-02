@@ -2,20 +2,20 @@ import serial
 import socket                                         
 import _thread
 import time
-
 import os
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-
 import subprocess
+import psutil
 
-from luma.core.interface.serial import i2c, spi
-from luma.oled.device import ssd1306, ssd1325, ssd1331, sh1106
+import yaml
+config_settings = yaml.load(open('./config.yml').read(), Loader=yaml.FullLoader)
+gnss_port = config_settings['gnss_port']
+gnss_port_baud = config_settings['gnss_port_baud']
 
-#  oled = sh1106(i2c(port=1, address=0x3C))
+from gnss_device.ublox import UBlox
+ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
 
-gnss_device = serial.Serial("/dev/serial0", 115200)
+from oled import Oled
+oled = Oled()
 
 # create a socket object
 serversocket = socket.socket(
@@ -32,71 +32,42 @@ serversocket.bind((host, port))
 # queue up to 5 requests
 serversocket.listen(5)                                           
 
-current_client = None
-def client_rx_thread():
-    global current_client
+def gnss_proxy_thread():
     while True:
-        if current_client:
+        if ublox.proxy:
             try:
-                data = current_client.recv(1)
+                data = ublox.proxy.recv(1024)
             except Exception as e:
-                current_client = None
+                ublox.proxy = None
 
             if data:
-                gnss_device.write(data)
+                ublox.write(data)
+        else:
+            # establish a connection
+            clientsocket,addr = serversocket.accept()      
+            print("Got a connection from %s" % str(addr))
+            ublox.proxy = clientsocket
 
-def client_tx_thread():
-    global current_client
+_thread.start_new_thread(gnss_proxy_thread, ())
+
+def oled_thread():
     while True:
-        data = gnss_device.read(1)
-        if current_client:
-            try:
-                if data:
-                    current_client.send(data)
-            except Exception as e:
-                current_client = None
+        host_ip = socket.gethostbyname(socket.gethostname())
+        cpu_usage = int(psutil.cpu_percent())
+        mem = psutil.virtual_memory()
+        memory_usage = int((mem.used / mem.total) * 100)
+        if True:
+            print("ublox.gps_count", ublox.gnss_count)
+            print("ublox.is_survey_in_success", ublox.is_survey_in_success)
+            print("ublox.survey_in_acc", ublox.survey_in_acc)
+            print("host_ip", host_ip)
+            print("cpu_usage", cpu_usage)
+            print("memory_usage", memory_usage)
+        oled.refresh(ublox.gnss_count, host_ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
+        time.sleep(0.2)
 
-def gnss_thread():
-    global current_client
-    while True:
-       # establish a connection
-       clientsocket,addr = serversocket.accept()      
-       print("Got a connection from %s" % str(addr))
-       current_client = clientsocket
+_thread.start_new_thread(oled_thread, ())
 
-_thread.start_new_thread(client_tx_thread, ())
-_thread.start_new_thread(client_rx_thread, ())
-_thread.start_new_thread(gnss_thread, ())
+ublox.loop()
 
-#  width = oled.width
-#  height = oled.height
-#  image = Image.new('1', (width, height))
-#  draw = ImageDraw.Draw(image)
-#  padding = -2
-#  top = padding
-#  bottom = height - padding
-#  x = 0
-#  font = ImageFont.load_default()
-#  while True:
-    #  draw.rectangle((0,0,width,height), outline=0, fill=0)
-
-    #  # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    #  cmd = "hostname -I | cut -d\' \' -f1"
-    #  IP = subprocess.check_output(cmd, shell = True )
-    #  cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-    #  CPU = subprocess.check_output(cmd, shell = True )
-    #  cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
-    #  MemUsage = subprocess.check_output(cmd, shell = True )
-    #  cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
-    #  Disk = subprocess.check_output(cmd, shell = True )
-
-    #  # Write two lines of text.
-
-    #  draw.text((x, top),       "IP: " + IP.decode('utf-8').replace('\n', ''),  font=font, fill=255)
-    #  draw.text((x, top+8),     CPU.decode('utf-8'), font=font, fill=255)
-    #  draw.text((x, top+16),    MemUsage.decode('utf-8'),  font=font, fill=255)
-    #  draw.text((x, top+25),    Disk.decode('utf-8'),  font=font, fill=255)
-
-    #  # Display image.
-    #  oled.display(image)
-    #  time.sleep(.1)
+serversocket.close()
