@@ -29,4 +29,11 @@ class Oled(object):
         if not self.dev:
             self.spi.xfer(data)
         else:
-            print(len(data))
+            if True:
+                print("ublox.gps_count", gnss_count)
+                print("ublox.is_survey_in_success", survey_in)
+                print("ublox.survey_in_acc", acc)
+                print("host_ip", ip)
+                print("cpu_usage", cpu_usage)
+                print("memory_usage", memory_usage)
+                print(len(data))

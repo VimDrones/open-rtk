@@ -14,9 +14,14 @@ gnss_port_baud = config_settings['gnss_port_baud']
 from gnss_device.ublox import UBlox
 ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
 
+dev = not socket.gethostname()=='raspberrypi'
 from oled import Oled
-oled = Oled(dev=not socket.gethostname()=='raspberrypi')
-
+oled = Oled(dev= dev)
+if dev:
+    ip = list(map(int, socket.gethostbyname(socket.gethostname()).split("."))) 
+else:
+    ip = list(map(int, subprocess.check_output("hostname -I | cut -d\' \' -f1", shell = True ).decode("utf-8").split("."))) 
+    
 # create a socket object
 serversocket = socket.socket(
 	        socket.AF_INET, socket.SOCK_STREAM) 
@@ -52,19 +57,10 @@ _thread.start_new_thread(gnss_proxy_thread, ())
 
 def oled_thread():
     while True:
-        host_ip = socket.gethostbyname(socket.gethostname())
-        
         cpu_usage = int(psutil.cpu_percent())
         mem = psutil.virtual_memory()
         memory_usage = int((mem.used / mem.total) * 100)
-        if True:
-            print("ublox.gps_count", ublox.gnss_count)
-            print("ublox.is_survey_in_success", ublox.is_survey_in_success)
-            print("ublox.survey_in_acc", ublox.survey_in_acc)
-            print("host_ip", host_ip)
-            print("cpu_usage", cpu_usage)
-            print("memory_usage", memory_usage)
-        oled.refresh(ublox.gnss_count, list(map(int, host_ip.split("."))), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
+        oled.refresh(ublox.gnss_count, ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
         time.sleep(0.2)
 
 _thread.start_new_thread(oled_thread, ())
