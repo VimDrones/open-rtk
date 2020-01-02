@@ -25,6 +25,9 @@ class Oled(object):
             self.spi.max_speed_hz = 125000 * 16
         
     def refresh(self, gnss_count, ip, acc, survey_in, cpu_usage, memory_usage, empty):
+        if acc > 4294967295:
+            acc = 4294967295
+
         data = struct.pack('<B B BBBB I B B B B B', HEADER, gnss_count, *ip, acc, survey_in, cpu_usage, memory_usage, empty, END)
         if not self.dev:
             self.spi.xfer(data)
