@@ -60,11 +60,21 @@ def oled_thread():
         cpu_usage = int(psutil.cpu_percent())
         mem = psutil.virtual_memory()
         memory_usage = int((mem.used / mem.total) * 100)
-        oled.refresh(ublox.gnss_count, ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
+        oled.refresh(ublox.gnss_count, ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
         time.sleep(0.2)
 
 _thread.start_new_thread(oled_thread, ())
+_thread.start_new_thread(ublox.loop, ())
 
-ublox.loop()
+from flask import Flask, jsonify
+app = Flask(__name__)
 
-serversocket.close()
+@app.route('/')
+def index():
+    return 'OPEN BASE'
+
+@app.route('/gnss')
+def gnss():
+    return jsonify(ublox.status)
+
+app.run(host="0.0.0.0", port="80")

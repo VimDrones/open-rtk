@@ -24,15 +24,15 @@ class Oled(object):
             self.spi.mode = 0b11
             self.spi.max_speed_hz = 125000 * 16
         
-    def refresh(self, gnss_count, ip, acc, survey_in, cpu_usage, memory_usage, empty):
+    def refresh(self, gnss_count, ip, acc, survey_in, cpu_usage, memory_usage, empty1=0, empty2=0):
         if acc > 4294967295:
             acc = 4294967295
 
-        data = struct.pack('<B B BBBB I B B B B B', HEADER, gnss_count, *ip, acc, survey_in, cpu_usage, memory_usage, empty, END)
+        data = struct.pack('<B B BBBB I B B B B B B', HEADER, gnss_count, *ip, acc, survey_in, cpu_usage, memory_usage, empty1, empty2, END)
         if not self.dev:
             self.spi.xfer(data)
         else:
-            if True:
+            if False:
                 print("ublox.gps_count", gnss_count)
                 print("ublox.is_survey_in_success", survey_in)
                 print("ublox.survey_in_acc", acc)
