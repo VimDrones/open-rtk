@@ -1,3 +1,6 @@
 [submodule "mavlink-router"]
 	path = mavlink-router
 	url = https://github.com/intel/mavlink-router.git
+[submodule "gnss_device"]
+	path = gnss_device
+	url = https://github.com/Huibean/gnss_device.git
