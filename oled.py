@@ -1,6 +1,5 @@
 import time
 import sys
-import spidev
 
 import struct
 HEADER = 0xAA
@@ -16,12 +15,18 @@ END = 0x55
 
 class Oled(object):
 
-    def __init__(self):
-        self.spi = spidev.SpiDev()
-        self.spi.open(0,0)
-        self.spi.mode = 0b11
-        self.spi.max_speed_hz = 125000 * 16
+    def __init__(self, dev=False):
+        self.dev = dev
+        if not self.dev:
+            import spidev
+            self.spi = spidev.SpiDev()
+            self.spi.open(0,0)
+            self.spi.mode = 0b11
+            self.spi.max_speed_hz = 125000 * 16
         
     def refresh(self, gnss_count, ip, acc, survey_in, cpu_usage, memory_usage, empty):
         data = struct.pack('<B B BBBB I B B B B B', HEADER, gnss_count, *ip, acc, survey_in, cpu_usage, memory_usage, empty, END)
-        self.spi.xfer(data)
+        if not self.dev:
+            self.spi.xfer(data)
+        else:
+            print(len(data))

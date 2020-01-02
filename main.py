@@ -15,7 +15,7 @@ from gnss_device.ublox import UBlox
 ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
 
 from oled import Oled
-oled = Oled()
+oled = Oled(dev=not socket.gethostname()=='raspberrypi')
 
 # create a socket object
 serversocket = socket.socket(
@@ -53,6 +53,7 @@ _thread.start_new_thread(gnss_proxy_thread, ())
 def oled_thread():
     while True:
         host_ip = socket.gethostbyname(socket.gethostname())
+        
         cpu_usage = int(psutil.cpu_percent())
         mem = psutil.virtual_memory()
         memory_usage = int((mem.used / mem.total) * 100)
@@ -63,7 +64,7 @@ def oled_thread():
             print("host_ip", host_ip)
             print("cpu_usage", cpu_usage)
             print("memory_usage", memory_usage)
-        oled.refresh(ublox.gnss_count, host_ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
+        oled.refresh(ublox.gnss_count, list(map(int, host_ip.split("."))), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage, 0)
         time.sleep(0.2)
 
 _thread.start_new_thread(oled_thread, ())
