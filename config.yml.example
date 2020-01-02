@@ -1,4 +1,4 @@
- gnss_port: /dev/serial0
+gnss_port: /dev/serial0
 gnss_port_baud: 115200
 radio_port: /dev/serial1
 radio_port_baud: 115200

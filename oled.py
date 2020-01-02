@@ -14,8 +14,6 @@ END = 0x55
 #  memory_usage = 60
 #  empty = 0
 
-from ublox import *
-
 class Oled(object):
 
     def __init__(self):

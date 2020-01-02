@@ -1,2 +1,7 @@
 # open-rtk
-open source rtk base
+```shell
+pip3 install psutil
+cp config.yml.example config.yml
+python3 main.py
+```
+
