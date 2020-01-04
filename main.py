@@ -77,4 +77,4 @@ def index():
 def gnss():
     return jsonify(ublox.status)
 
-app.run(host="0.0.0.0", port="80")
+app.run(host="0.0.0.0", port="3000")
