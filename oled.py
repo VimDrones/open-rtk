@@ -32,7 +32,7 @@ class Oled(object):
         if not self.dev:
             self.spi.xfer(data)
 
-        print(struct.unpack('<B B BBBB I B B B B B B', data)
+        print(struct.unpack('<B B BBBB I B B B B B B', data))
         if False:
             print("ublox.gps_count", gnss_count)
             print("ublox.is_survey_in_success", survey_in)
