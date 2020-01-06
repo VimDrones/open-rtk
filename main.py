@@ -17,12 +17,15 @@ ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
 dev = not socket.gethostname()=='raspberrypi'
 from oled import Oled
 oled = Oled(dev= dev)
-if dev:
-    ip = list(map(int, socket.gethostbyname(socket.gethostname()).split("."))) 
-else:
-    ip = list(map(int, subprocess.check_output("hostname -I", shell = True ).decode("utf-8").split("."))) 
 
-print("ip", ip)
+def get_ip():
+    global dev
+    if dev:
+        ip = list(map(int, socket.gethostbyname(socket.gethostname()).split("."))) 
+    else:
+        ip = list(map(int, subprocess.check_output("hostname -I", shell = True ).decode("utf-8").split("."))) 
+
+    return ip
 
 # create a socket object
 serversocket = socket.socket(
@@ -62,7 +65,7 @@ def oled_thread():
         cpu_usage = int(psutil.cpu_percent())
         mem = psutil.virtual_memory()
         memory_usage = int((mem.used / mem.total) * 100)
-        oled.refresh(ublox.gnss_count, ip, ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
+        oled.refresh(ublox.gnss_count, get_ip(), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
         time.sleep(0.2)
 
 _thread.start_new_thread(oled_thread, ())
