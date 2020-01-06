@@ -20,8 +20,10 @@ oled = Oled(dev= dev)
 if dev:
     ip = list(map(int, socket.gethostbyname(socket.gethostname()).split("."))) 
 else:
-    ip = list(map(int, subprocess.check_output("hostname -I | cut -d\' \' -f1", shell = True ).decode("utf-8").split("."))) 
-    
+    ip = list(map(int, subprocess.check_output("hostname -I", shell = True ).decode("utf-8").split("."))) 
+
+print("ip", ip)
+
 # create a socket object
 serversocket = socket.socket(
 	        socket.AF_INET, socket.SOCK_STREAM) 
