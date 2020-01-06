@@ -66,7 +66,7 @@ def oled_thread():
         mem = psutil.virtual_memory()
         memory_usage = int((mem.used / mem.total) * 100)
         oled.refresh(ublox.gnss_count, get_ip(), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
-        time.sleep(0.2)
+        time.sleep(1)
 
 _thread.start_new_thread(oled_thread, ())
 _thread.start_new_thread(ublox.loop, ())
