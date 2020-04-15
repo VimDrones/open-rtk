@@ -4,7 +4,6 @@ import _thread
 import time
 import os
 import subprocess
-import psutil
 
 import yaml
 config_settings = yaml.load(open('./config.yml').read(), Loader=yaml.FullLoader)
@@ -15,6 +14,8 @@ from gnss_device.ublox import UBlox
 ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
 
 dev = not socket.gethostname()=='raspberrypi'
+if not dev:
+    import psutil
 from oled import Oled
 oled = Oled(dev= dev)
 
@@ -28,8 +29,7 @@ def get_ip():
     return ip
 
 # create a socket object
-serversocket = socket.socket(
-	        socket.AF_INET, socket.SOCK_STREAM) 
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 
 # get local machine name
 host = "0.0.0.0"                           
@@ -62,21 +62,28 @@ _thread.start_new_thread(gnss_proxy_thread, ())
 
 def oled_thread():
     while True:
-        cpu_usage = int(psutil.cpu_percent())
-        mem = psutil.virtual_memory()
-        memory_usage = int((mem.used / mem.total) * 100)
-        oled.refresh(ublox.gnss_count, get_ip(), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
+        if not dev:
+            cpu_usage = int(psutil.cpu_percent())
+            mem = psutil.virtual_memory()
+            memory_usage = int((mem.used / mem.total) * 100)
+            oled.refresh(ublox.gnss_count, get_ip(), ublox.survey_in_acc, ublox.is_survey_in_success, cpu_usage, memory_usage)
+
         time.sleep(1)
 
 _thread.start_new_thread(oled_thread, ())
 _thread.start_new_thread(ublox.loop, ())
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 @app.route('/')
 def index():
-    return 'OPEN BASE'
+    return render_template('index.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
 
 @app.route('/gnss')
 def gnss():
