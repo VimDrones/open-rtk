@@ -4,11 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Vimdrones Open RTK</title>
-    <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='bootstrap-4.4.1/css/bootstrap.min.css') }}>
-    <script src={{ url_for('static', filename='jquery-3.5.0.min.js') }}></script>
-    <script src={{ url_for('static', filename='bootstrap-4.4.1/js/bootstrap.min.js') }}></script>
+    {% include 'head.html' %}
   </head>
   <body>
-    {% extends 'header.html' %}
+    {% include 'header.html' %}
   </body>
 </html>

@@ -4,42 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Vimdrones Open RTK</title>
-    <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='bootstrap-4.4.1/css/bootstrap.min.css') }}>
-    <script src={{ url_for('static', filename='jquery-3.5.0.min.js') }}></script>
-    <script src={{ url_for('static', filename='bootstrap-4.4.1/js/bootstrap.min.js') }}></script>
+    {% include 'head.html' %}
   </head>
   <body>
-    {% extends 'header.html' %}
+    {% include 'header.html' %}
 
-    <form>
+<div class="container">
+    <form action="/change_gps_baud" method="post">
       <div class="form-group">
-        <label for="exampleFormControlInput1">Email address</label>
-        <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-      </div>
-      <div class="form-group">
-        <label for="exampleFormControlSelect1">Example select</label>
-        <select class="form-control" id="exampleFormControlSelect1">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5</option>
+        <label for="gps_baud">GPS Baud</label>
+        <select class="form-control" id="gps_baud" name="gps_baud" value="1">
+        {% for baud in GPS_BAUDRATES %}
+          <option>{{baud}}</option>
+        {% endfor %}
         </select>
       </div>
-      <div class="form-group">
-        <label for="exampleFormControlSelect2">Example multiple select</label>
-        <select multiple class="form-control" id="exampleFormControlSelect2">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="exampleFormControlTextarea1">Example textarea</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-      </div>
+      <button type="submit" class="btn btn-primary">Change</button>
     </form>
+</div>
+
+
   </body>
 </html>

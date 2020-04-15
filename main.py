@@ -73,17 +73,30 @@ def oled_thread():
 _thread.start_new_thread(oled_thread, ())
 _thread.start_new_thread(ublox.loop, ())
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+GPS_BAUDRATES = [9600, 115200]
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    return render_template('settings.html')
+    if request.method == "GET":
+        return render_template('settings.html', GPS_BAUDRATES=GPS_BAUDRATES)
+
+@app.route('/change_gps_baud', methods=['POST'])
+def change_gps_baud():
+    print("change_gps_baud")
+    if request.method == "POST":
+        print(request.form)
+        gps_baud = request.form.get("gps_baud")
+        if gps_baud:
+            pass
+        return redirect(url_for('settings'))
 
 @app.route('/gnss')
 def gnss():
