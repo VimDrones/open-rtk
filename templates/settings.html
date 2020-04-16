@@ -10,17 +10,18 @@
     {% include 'header.html' %}
 
 <div class="container">
-    <form action="/change_gps_baud" method="post">
-      <div class="form-group">
-        <label for="gps_baud">GPS Baud</label>
-        <select class="form-control" id="gps_baud" name="gps_baud" value="1">
-        {% for baud in GPS_BAUDRATES %}
-          <option>{{baud}}</option>
-        {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">Change</button>
-    </form>
+  {% include 'flash.html' %}
+  <form action="/settings" method="post">
+    <div class="form-group" style="width:200px;">
+      <label for="gnss_baud">GNSS Port Baud</label>
+      <select class="form-control" id="gnss_baud" name="gnss_baud">
+      {% for baud in GNSS_BAUDRATES %}
+        <option {{"selected" if baud == gnss_port_baud}}>{{baud}}</option>
+      {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Change</button>
+  </form>
 </div>
 
 

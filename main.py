@@ -7,11 +7,13 @@ import subprocess
 
 import yaml
 config_settings = yaml.load(open('./config.yml').read(), Loader=yaml.FullLoader)
-gnss_port = config_settings['gnss_port']
-gnss_port_baud = config_settings['gnss_port_baud']
 
 from gnss_device.ublox import UBlox
-ublox = UBlox(gnss_port, baudrate=gnss_port_baud, timeout=0.01)
+ublox = UBlox(config_settings['gnss_port'], baudrate=config_settings['gnss_port_baud'], timeout=0.01)
+
+def save_config():
+    with open('./config.yml', 'w') as file:
+        documents = yaml.dump(config_settings, file)
 
 dev = not socket.gethostname()=='raspberrypi'
 if not dev:
@@ -77,7 +79,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-GPS_BAUDRATES = [9600, 115200]
+GNSS_BAUDRATES = [9600, 115200]
 
 @app.route('/')
 def index():
@@ -86,17 +88,19 @@ def index():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == "GET":
-        return render_template('settings.html', GPS_BAUDRATES=GPS_BAUDRATES)
+        message = None
+    elif request.method == "POST": 
+        try:
+            gnss_baud = request.form.get("gnss_baud")
+            if gnss_baud:
+                config_settings['gnss_port_baud'] = int(gnss_baud)
+                save_config()
+                ublox.reload(baudrate=config_settings['gnss_port_baud'])
+                message = {"type": "alert-success", "content": "Change GNSS Port Baud Success!"}
+        except Exception as e:
+            message = {"type": "alert-danger", "content": "Something Wrong!"}
 
-@app.route('/change_gps_baud', methods=['POST'])
-def change_gps_baud():
-    print("change_gps_baud")
-    if request.method == "POST":
-        print(request.form)
-        gps_baud = request.form.get("gps_baud")
-        if gps_baud:
-            pass
-        return redirect(url_for('settings'))
+    return render_template('settings.html', GNSS_BAUDRATES=GNSS_BAUDRATES, gnss_port_baud=config_settings['gnss_port_baud'], message=message)
 
 @app.route('/gnss')
 def gnss():
