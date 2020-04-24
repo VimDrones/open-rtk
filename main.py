@@ -79,7 +79,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-GNSS_BAUDRATES = [9600, 115200]
+GNSS_BAUDRATES = [1200, 2400, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
 
 @app.route('/')
 def index():
